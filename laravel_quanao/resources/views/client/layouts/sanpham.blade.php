@@ -306,7 +306,17 @@
         </div>
     </div>
 </section>
+<script>
+    window.isLoggedIn = {{ Auth::check() ? 'true' : 'false' }};
+    window.loginUrl = "{{ route('login') }}";
 
+    // Fix kiểu dữ liệu (để không thành chuỗi)
+    if (typeof window.isLoggedIn === 'string') {
+        window.isLoggedIn = (window.isLoggedIn === 'true');
+    }
+
+    console.log("DEBUG isLoggedIn =", window.isLoggedIn);
+</script>
 <script>
 // --- Lấy danh sách từ localStorage ---
 function getWishlist() {
@@ -348,9 +358,16 @@ function renderWishlist() {
     document.getElementById("wishlist-items").innerHTML = html;
 }
 
-// --- Xử lý khi bấm icon tim ---
 document.querySelectorAll(".favorite-btn").forEach(btn => {
     btn.addEventListener("click", function() {
+
+        // 🔥 KIỂM TRA ĐĂNG NHẬP
+        if (!window.isLoggedIn) {
+            alert("Bạn phải đăng nhập để yêu thích sản phẩm!");
+            window.location.href = window.loginUrl;
+            return;
+        }
+        // 🔥 KẾT THÚC PHẦN KIỂM TRA ----------------------
 
         let id = this.dataset.id;
         let wishlist = getWishlist();
@@ -385,6 +402,7 @@ document.querySelectorAll(".favorite-btn").forEach(btn => {
     });
 });
 
+
 // --- Hiện popup khi bấm icon tim trên header ---
 document.getElementById("wishlist-icon").addEventListener("click", function() {
     document.getElementById("wishlist-panel").classList.add("show-header-cart");
@@ -400,4 +418,6 @@ document.querySelectorAll(".js-hide-wishlist").forEach(btn => {
 // --- Load khi mở trang ---
 updateWishlistCount();
 renderWishlist();
+
+
 </script>

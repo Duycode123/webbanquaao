@@ -186,3 +186,9 @@ Route::group(['middleware' => 'auth'], function () {
 Route::get('/tro-giup', function () {
     return view('help');
 })->name('help');
+
+Route::get('/wishlist/add/{id}', [WishlistController::class, 'add'])
+    ->middleware('auth')
+    ->name('wishlist.add');
+    
+Route::get('/search', [san_phamcontroller::class, 'search'])->name('search.result');
