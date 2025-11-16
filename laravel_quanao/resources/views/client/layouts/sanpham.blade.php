@@ -250,60 +250,52 @@
 
         <div class="row isotope-grid">
 
-            @foreach($sanpham as $item)
+        @foreach($sanpham as $item)
+<div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item women">
 
-            <div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item women">
-                <!-- Block2 -->
-                <div class="block2">
-                    <div class="block2-pic hov-img0">
+    <div class="block2">
+        <div class="block2-pic hov-img0">
+            <img src="{{ $item->anh_sanpham }}" alt="IMG-PRODUCT">
 
-                        <img src="{{$item -> anh_sanpham}}" alt="IMG-PRODUCT">
+            <a href="{{ route('san_pham.showdetail', $item->ma_san_pham) }}"
+               class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04">
+                Chi tiết
+            </a>
+        </div>
 
-                        <a href="{{route ('san_pham.showdetail' , $item -> ma_san_pham)}}" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
-                            Chi Tiết
-                        </a>
+        <div class="block2-txt flex-w flex-t p-t-14">
 
-                    </div>
+            <div class="block2-txt-child1 flex-col-l">
+                <span class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
+                    {{ $item->ten_san_pham }}
+                </span>
 
-                    <div class="block2-txt flex-w flex-t p-t-14">
-
-                        <div class="block2-txt-child1 flex-col-l ">
-
-                            <a href="/chitiet" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
-
-                                {{$item -> ten_san_pham}}
-
-                            </a>
-                            <div style="display : flex ; justify-content: space-between;">
-
-
-                                <span style="text-decoration: line-through;color: #888;padding-right : 25px " class="stext-105 cl3">
-
-                                    {{number_format($item -> gia)}} VNĐ
-
-                                </span>
-                                <span class="stext-105 cl3">
-
-                                    {{ number_format($item->gia * 0.9) }} VNĐ
-
-                                </span>
-
-
-                            </div>
-
-
-                        </div>
-
-                        <div class="block2-txt-child2 flex-r p-t-3">
-                            <a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
-                                <img class="icon-heart1 dis-block trans-04" src="client/images/icons/icon-heart-01.png" alt="ICON">
-                                <img class="icon-heart2 dis-block trans-04 ab-t-l" src="client/images/icons/icon-heart-02.png" alt="ICON">
-                            </a>
-                        </div>
-                    </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="text-decoration: line-through; color:#888;" class="stext-105 cl3">
+                        {{ number_format($item->gia) }} VNĐ
+                    </span>
+                    <span class="stext-105 cl3">
+                        {{ number_format($item->gia * 0.9) }} VNĐ
+                    </span>
                 </div>
             </div>
-            @endforeach
+
+            <!-- HEART ICON -->
+            <div class="block2-txt-child2 flex-r p-t-3">
+                <i class="favorite-btn zmdi zmdi-favorite-outline"
+                   data-id="{{ $item->ma_san_pham }}"
+                   data-name="{{ $item->ten_san_pham }}"
+                   data-img="{{ $item->anh_sanpham }}"
+                   data-url="{{ route('san_pham.showdetail', $item->ma_san_pham) }}"
+                   style="font-size:25px; cursor:pointer;">
+                </i>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+@endforeach
         </div>
 
         <!-- Load more -->
@@ -314,3 +306,98 @@
         </div>
     </div>
 </section>
+
+<script>
+// --- Lấy danh sách từ localStorage ---
+function getWishlist() {
+    return JSON.parse(localStorage.getItem("wishlist") || "[]");
+}
+
+// --- Lưu lại ---
+function saveWishlist(data) {
+    localStorage.setItem("wishlist", JSON.stringify(data));
+}
+
+// --- Cập nhật số tim trên header ---
+function updateWishlistCount() {
+    document.getElementById("wishlist-icon").setAttribute("data-notify", getWishlist().length);
+}
+
+// --- Render danh sách lên popup ---
+function renderWishlist() {
+    let items = getWishlist();
+    let html = "";
+
+    items.forEach(item => {
+        html += `
+            <div class="header-cart-item flex-w flex-t m-b-12" style="cursor:pointer;"
+                 onclick="window.location='${item.url}'">
+                <div class="header-cart-item-img">
+                    <img src="${item.img}" alt="IMG">
+                </div>
+
+                <div class="header-cart-item-txt p-t-8">
+                    <a class="header-cart-item-name m-b-18 hov-cl1 trans-04">
+                        ${item.name}
+                    </a>
+                </div>
+            </div>
+        `;
+    });
+
+    document.getElementById("wishlist-items").innerHTML = html;
+}
+
+// --- Xử lý khi bấm icon tim ---
+document.querySelectorAll(".favorite-btn").forEach(btn => {
+    btn.addEventListener("click", function() {
+
+        let id = this.dataset.id;
+        let wishlist = getWishlist();
+
+        let exists = wishlist.find(x => x.id == id);
+
+        if (!exists) {
+            wishlist.push({
+                id: id,
+                name: this.dataset.name,
+                img: this.dataset.img,
+                url: this.dataset.url
+            });
+
+            saveWishlist(wishlist);
+            updateWishlistCount();
+            renderWishlist();
+
+            this.classList.remove("zmdi-favorite-outline");
+            this.classList.add("zmdi-favorite");
+
+        } else {
+            // Xóa nếu bấm lại
+            wishlist = wishlist.filter(x => x.id != id);
+            saveWishlist(wishlist);
+            updateWishlistCount();
+            renderWishlist();
+
+            this.classList.remove("zmdi-favorite");
+            this.classList.add("zmdi-favorite-outline");
+        }
+    });
+});
+
+// --- Hiện popup khi bấm icon tim trên header ---
+document.getElementById("wishlist-icon").addEventListener("click", function() {
+    document.getElementById("wishlist-panel").classList.add("show-header-cart");
+});
+
+// --- Ẩn popup ---
+document.querySelectorAll(".js-hide-wishlist").forEach(btn => {
+    btn.addEventListener("click", function() {
+        document.getElementById("wishlist-panel").classList.remove("show-header-cart");
+    });
+});
+
+// --- Load khi mở trang ---
+updateWishlistCount();
+renderWishlist();
+</script>

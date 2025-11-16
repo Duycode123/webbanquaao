@@ -14,6 +14,8 @@ use App\Http\Controllers\chi_tiet_don_hangcontroller;
 use App\Http\Controllers\Thongkecontroller;
 use Illuminate\Support\Facades\Auth as FacadesAuth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HelpController;
+
 FacadesAuth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
@@ -180,3 +182,7 @@ Route::group(['middleware' => 'auth'], function () {
     
 });
 
+// web.php
+Route::get('/tro-giup', function () {
+    return view('help');
+})->name('help');
